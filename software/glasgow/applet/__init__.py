@@ -358,3 +358,4 @@ from .swd import SWDApplet
 from .uart import UARTApplet
 from .vga_output import VGAOutputApplet
 from .vga_terminal import VGATerminalApplet
+from .ws2812b import WS2812BApplet
