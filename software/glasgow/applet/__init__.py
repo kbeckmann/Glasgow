@@ -356,3 +356,4 @@ from .spi_flash_25c import SPIFlash25CApplet
 from .spi_flash_avr import SPIFlashAVRApplet
 from .swd import SWDApplet
 from .uart import UARTApplet
+from .ws2812b import WS2812BApplet
