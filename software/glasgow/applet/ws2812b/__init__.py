@@ -7,7 +7,7 @@ import math
 from migen import *
 from migen.genlib.fsm import *
 
-from . import *
+from .. import *
 
 #        ________________             ____
 #       |       |        |           |
