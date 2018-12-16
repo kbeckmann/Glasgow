@@ -19,4 +19,4 @@ echo $height
 
 crop_height=$(( 8 * (width / 144) ))
 
-ffmpeg -i "$1" -vf "crop=$width:$crop_height,scale=144:8" "$2"
+ffmpeg -i "$1" -vf "crop=$width:$crop_height,scale=144:8" -vcodec rawvideo -pix_fmt rgb24 "$2"
