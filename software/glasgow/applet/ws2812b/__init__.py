@@ -7,6 +7,7 @@ import math
 from migen import *
 from migen.genlib.fsm import *
 import binascii
+import asyncio
 
 from .. import *
 
@@ -186,14 +187,14 @@ class WS2812BApplet(GlasgowApplet, name="ws2812b"):
         pixelstream = args.pixelstream.read()
 
         # Infinite loop
-        while True:
+        for i in range(3):
             print("Loop")
             pixelbuf = memoryview(pixelstream)
             i = 0
             t0 = time.time()
             num_bytes = 0
             offset = 0
-            while offset < len(pixelstream):
+            while offset < len(pixelbuf):
                 i += 1
                 tdiff = time.time() - t0
                 if tdiff > 0.5:
@@ -203,9 +204,14 @@ class WS2812BApplet(GlasgowApplet, name="ws2812b"):
                 chunk = pixelbuf[offset:offset + args.pixels * 3 * args.outputs]
                 num_bytes += len(chunk)
                 offset += len(chunk)
-                await iface.write(struct.pack(">HBB", len(chunk), args.delay, args.outputs))
-                await iface.write(chunk)
+                await iface.write(struct.pack(">HBB", len(chunk), args.delay, args.outputs) + chunk)
                 await iface.flush()
+                # await asyncio.sleep(0.01)
+            # for i in range(1000):
+            #     chunk = b"\x00" * args.pixels * 3 * args.outputs
+            #     await iface.write(struct.pack(">HBB", len(chunk), args.delay, args.outputs) + chunk)
+            #     await iface.flush()
+
         await iface.write([0])
         await iface.flush()
 

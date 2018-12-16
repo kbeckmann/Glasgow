@@ -13,7 +13,8 @@ PIXELS = WIDTH * HEIGHT
 
 interleaved = int(sys.argv[1])
 
-ARGB = 0 #todo
+ARGB = 0 # todo
+BPP = 4 if ARGB else 3
 
 # Read ARGB data
 data_in = bytearray(open(sys.argv[2], "rb").read())
@@ -25,13 +26,11 @@ def rgbv_to_bytes(r, g, b, v):
     b = int(float(b) * v)
     return bytearray(struct.pack("BBB", g, r, b))
 
-for frame in range(0, len(data_in) / 4 / PIXELS):
+for frame in range(0, len(data_in) / BPP / PIXELS):
     for i in range(0, PIXELS / interleaved):
         if interleaved == 2:
             index = frame * PIXELS + i
             if (index % (WIDTH * 2) >= WIDTH):
-                pass #todo remove
-            else:
                 offset = WIDTH - 1 + index % WIDTH
                 start = index - index % WIDTH
                 index = start + WIDTH - index % WIDTH - 1
@@ -70,8 +69,6 @@ for frame in range(0, len(data_in) / 4 / PIXELS):
         else:
             index = frame * PIXELS + i
             if (index % (WIDTH * 2) >= WIDTH):
-                pass #todo remove
-            else:
                 offset = WIDTH - 1 + index % WIDTH
                 start = index - index % WIDTH
                 index = start + WIDTH - index % WIDTH - 1
