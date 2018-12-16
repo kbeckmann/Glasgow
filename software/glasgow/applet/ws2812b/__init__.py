@@ -192,16 +192,17 @@ class WS2812BApplet(GlasgowApplet, name="ws2812b"):
             i = 0
             t0 = time.time()
             num_bytes = 0
-            while len(pixelbuf) > 0:
+            offset = 0
+            while offset < len(pixelstream):
                 i += 1
                 tdiff = time.time() - t0
                 if tdiff > 0.5:
                     print("{} bytes/s; {} fps".format(round(num_bytes / tdiff), round(2.0 * i / tdiff)))
                     i = num_bytes = 0
                     t0 = time.time()
-                chunk = pixelbuf[:args.pixels * 3 * args.outputs]
+                chunk = pixelbuf[offset:offset + args.pixels * 3 * args.outputs]
                 num_bytes += len(chunk)
-                pixelbuf = pixelbuf[args.pixels * 3 * args.outputs:]
+                offset += len(chunk)
                 await iface.write(struct.pack(">HBB", len(chunk), args.delay, args.outputs))
                 await iface.write(chunk)
                 await iface.flush()
