@@ -67,38 +67,29 @@ for frame in range(0, len(data_in) / 4 / PIXELS):
                     cur |= (byte1 & (2**j)) << (j + 0)
                     cur |= (byte2 & (2**j)) << (j + 1)
                 f.write(struct.pack(">H", cur))
-        # else:
-        #     if (n % (ROW * 2) < ROW):
-        #         index = n
-        #     else:
-        #         offset = ROW - 1 + n % ROW
-        #         start = n - n % ROW
-        #         index = start + ROW - n % ROW - 1
+        else:
+            index = frame * PIXELS + i
+            if (index % (WIDTH * 2) >= WIDTH):
+                pass #todo remove
+            else:
+                offset = WIDTH - 1 + index % WIDTH
+                start = index - index % WIDTH
+                index = start + WIDTH - index % WIDTH - 1
 
-        #     # Align for ARGB
-        #     if ARGB:
-        #         index *= 4
-        #         a = 255 - int(data_in[index + 0])
-        #         r = int((data_in[index + 1] * a) / 255)
-        #         g = int((data_in[index + 2] * a) / 255)
-        #         b = int((data_in[index + 3] * a) / 255)
-        #     else:
-        #         index *= 3
-        #         r = int(data_in[index + 0])
-        #         g = int(data_in[index + 1])
-        #         b = int(data_in[index + 2])
+            # Align for ARGB
+            if ARGB:
+                index *= 4
+                a = 255 - int(data_in[index + 0])
+                r = int((data_in[index + 1] * a) / 255)
+                g = int((data_in[index + 2] * a) / 255)
+                b = int((data_in[index + 3] * a) / 255)
+            else:
+                index *= 3
+                r = int(data_in[index + 0])
+                g = int(data_in[index + 1])
+                b = int(data_in[index + 2])
 
-        #     data = rgbv_to_bytes(r, g, b, 0.1)
-        #     f.write(data)
+            data = rgbv_to_bytes(r, g, b, 0.1)
+            f.write(data)
 
 f.close()
-
-
-# ROW = 8
-# for n in range(ROW * 4):
-#     if (n % (ROW * 2) < ROW):
-#         print("Normal", n)
-#     else:
-#         offset = ROW - 1 + n % ROW
-#         start = n - n % ROW
-#         print("Specia", start + ROW - n % ROW - 1)
