@@ -16,7 +16,7 @@ for n in range(1000):
     for x in range(PIXELS):
         # This way we get a half "rainbow", easy to find breaks/seams
         # hue = float(x + n/10.) / PIXELS / 2
-        hue = (float(n) / 100 + float(x) / PIXELS / 2 )
+        hue = (float(n) / 100 + float(x) / PIXELS )
 
         r, g, b = colorsys.hsv_to_rgb(
                 hue,

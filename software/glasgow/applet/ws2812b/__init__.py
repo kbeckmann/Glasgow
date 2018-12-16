@@ -183,27 +183,28 @@ class WS2812BApplet(GlasgowApplet, name="ws2812b"):
 
     async def run(self, device, args):
         iface = await device.demultiplexer.claim_interface(self, self.mux_interface, args)
-
         pixelstream = args.pixelstream.read()
-        i = 0
-        t0 = time.time()
-        num_bytes = 0
-        while len(pixelstream) > 0:
-            i += 1
-            tdiff = time.time() - t0
-            if tdiff > 0.5:
-                print("{} bytes/s".format(round(num_bytes / tdiff)))
-                i = num_bytes = 0
-                t0 = time.time()
-            chunk = pixelstream[:args.pixels * 3 * args.outputs]
-            num_bytes += len(chunk)
-            pixelstream = pixelstream[args.pixels * 3 * args.outputs:]
-#            await iface.write(struct.pack(">HBB", len(chunk), args.delay, args.outputs))
-#            await iface.write(chunk)
-            data_out = struct.pack(">HBB", len(chunk), args.delay, args.outputs) + chunk
-            await iface.write(data_out)
-            # print (binascii.hexlify(data_out))
-            await iface.flush()
+
+        # Infinite loop
+        while True:
+            print("Loop")
+            pixelbuf = memoryview(pixelstream)
+            i = 0
+            t0 = time.time()
+            num_bytes = 0
+            while len(pixelbuf) > 0:
+                i += 1
+                tdiff = time.time() - t0
+                if tdiff > 0.5:
+                    print("{} bytes/s; {} fps".format(round(num_bytes / tdiff), round(2.0 * i / tdiff)))
+                    i = num_bytes = 0
+                    t0 = time.time()
+                chunk = pixelbuf[:args.pixels * 3 * args.outputs]
+                num_bytes += len(chunk)
+                pixelbuf = pixelbuf[args.pixels * 3 * args.outputs:]
+                await iface.write(struct.pack(">HBB", len(chunk), args.delay, args.outputs))
+                await iface.write(chunk)
+                await iface.flush()
         await iface.write([0])
         await iface.flush()
 
