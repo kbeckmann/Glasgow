@@ -6,6 +6,7 @@ import time
 import math
 from migen import *
 from migen.genlib.fsm import *
+import binascii
 
 from .. import *
 
@@ -197,8 +198,11 @@ class WS2812BApplet(GlasgowApplet, name="ws2812b"):
             chunk = pixelstream[:args.pixels * 3 * args.outputs]
             num_bytes += len(chunk)
             pixelstream = pixelstream[args.pixels * 3 * args.outputs:]
-            await iface.write(struct.pack(">HBB", len(chunk), args.delay, args.outputs))
-            await iface.write(chunk)
+#            await iface.write(struct.pack(">HBB", len(chunk), args.delay, args.outputs))
+#            await iface.write(chunk)
+            data_out = struct.pack(">HBB", len(chunk), args.delay, args.outputs) + chunk
+            await iface.write(data_out)
+            # print (binascii.hexlify(data_out))
             await iface.flush()
         await iface.write([0])
         await iface.flush()

@@ -1,38 +1,53 @@
 import colorsys
 import struct
 import math
+import random
 
-PIXELS = 94
+PIXELS = 144 * 4
 
 # interleaved = 1
-# interleaved = 2
+interleaved = 2
 # interleaved = 4
-interleaved = 8
+# interleaved = 8
 
 f = open("test_{}.bin".format(interleaved), "wb")
 
 for n in range(1000):
     for x in range(PIXELS):
         # This way we get a half "rainbow", easy to find breaks/seams
-        hue = float(x + n/10.) / PIXELS / 2
+        # hue = float(x + n/10.) / PIXELS / 2
+        hue = (float(n) / 100 + float(x) / PIXELS / 2 )
 
         r, g, b = colorsys.hsv_to_rgb(
                 hue,
                 1,
-                16 + 16 * math.sin(2. * math.pi * (5. * -x + n / 3.) / 100.)
-        )
+                16)
+        
+        r = int(r)
+        g = int(g)
+        b = int(b)
+#        print(r, g, b)
+        # r = random.randint(0, 16)
+        # g = random.randint(0, 16)
+        # b = random.randint(0, 16)
+        # r = 127 if n % 2 == 0 else 0
+        # g = 127 if n % 2 == 0 else 0
+        # b = 127 if n % 2 == 0 else 0
 
         if interleaved == 2:
-            data1 = struct.pack("BBB", r, g, b)
-            data2 = struct.pack("BBB", r, 0, 0) # intentionally wrong
+            data1 = bytearray(struct.pack("BBB", g, r, b))
+            data2 = bytearray(struct.pack("BBB", g, r, b))
             for i in range(len(data1)):
+                byte1 = data1[i]
+                byte2 = data2[i]
                 cur = 0
-                byte1 = ord(data1[i])
-                byte2 = ord(data2[i])
                 for j in range(8):
                     cur |= (byte1 & (2**j)) << (j + 0)
                     cur |= (byte2 & (2**j)) << (j + 1)
                 f.write(struct.pack(">H", cur))
+            #     print(hex(cur))
+            #     print(bin(cur))
+            # quit()
         elif interleaved == 4:
             data1 = struct.pack("BBB", r, g, b)
             data2 = struct.pack("BBB", r, 0, 0) # intentionally wrong
@@ -81,6 +96,6 @@ for n in range(1000):
                 f.write(struct.pack(">Q", cur))
         else:
             # No interleaving
-            f.write(struct.pack("BBB", r, g, b))
+            f.write(struct.pack("BBB", g, r, b))
 
 f.close()
