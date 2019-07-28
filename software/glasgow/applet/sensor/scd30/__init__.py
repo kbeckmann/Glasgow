@@ -7,6 +7,8 @@ import logging
 import asyncio
 import struct
 import crcmod
+import socket
+import time
 
 from ....support.logging import dump_hex
 from ...interface.i2c_master import I2CMasterApplet
@@ -224,6 +226,9 @@ class SensorSCD30Applet(I2CMasterApplet, name="sensor-scd30"):
         p_measure.add_argument(
             "-c", "--continuous", dest="continuous", action="store_true",
             help="measure continuously")
+        p_measure.add_argument(
+            "--upload", dest="upload", action="store_true",
+            help="upload data")
 
     async def interact(self, device, args, scd30):
         major, minor = await scd30.firmware_version()
@@ -264,8 +269,25 @@ class SensorSCD30Applet(I2CMasterApplet, name="sensor-scd30"):
                     await asyncio.sleep(0.37)
 
                 sample = await scd30.read_measurement()
-                print("CO₂={:.0f} ppm; T={:.2f} °C; RH={:.0f} %"
+                print("CO₂={:.0f} ppm; T={:.2f} °C; RH={:.2f} %"
                       .format(sample.co2_ppm, sample.temp_degC, sample.rh_pct))
+
+                if args.upload:
+                    try:
+                        unixtime = str(int(time.time()))
+                        dd = [
+                            "sensors.scd30.co2 {:.0f} {}".format(sample.co2_ppm, unixtime),
+                            "sensors.scd30.temp {:.2f} {}".format(sample.temp_degC, unixtime),
+                            "sensors.scd30.rh {:.2f} {}".format(sample.rh_pct, unixtime)
+                        ]
+                        d = '\n'.join(dd) + '\n'
+                        d = bytes(d, "utf-8")
+                        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        s.connect(('192.168.5.55', 2003))
+                        s.sendall(d)
+                    except Exception as error:
+                        print("Error uploading")
+                        print(error)
 
                 if not args.continuous:
                     break
