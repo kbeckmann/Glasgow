@@ -7,7 +7,7 @@ import sys
 import csv
 import yarl
 import aiohttp
-
+import socket
 
 __all__ = ["DataLogger", "STDOUTDataLogger"]
 
@@ -105,6 +105,28 @@ class CSVDataLogger(DataLogger, name="csv"):
             **fields
         })
         self.file.flush()
+
+class UDPDataLogger(DataLogger, name="udp"):
+    help = "log data using raw UDP"
+    description = """
+    Wheee
+    """
+
+    @classmethod
+    def add_arguments(cls, parser):
+        pass
+
+    async def report_data(self, fields, timestamp=None):
+        unixtime = str(int(time.time()))
+        out = []
+        for f in fields:
+            print(f, fields[f])
+            out.append('sensors.scd30.{} {} {}'.format(f, fields[f], unixtime))
+
+        d = '\n'.join(out) + '\n'
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(('192.168.5.55', 2003))
+        s.sendall(bytes(d, 'utf8'))
 
 
 class InfluxDBDataLogger(DataLogger, name="influxdb"):

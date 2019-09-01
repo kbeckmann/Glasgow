@@ -266,7 +266,7 @@ class I2CInitiatorApplet(GlasgowApplet, name="i2c-initiator"):
 
     Maximum transaction length is 65535 bytes.
     """
-    required_revision = "C0"
+    # required_revision = "C0"
 
     __pins = ("scl", "sda")
 
